@@ -1,0 +1,27 @@
+import pandas as pd
+import os
+
+def preprocess_bank_marketing(
+    input_path: str = "bank_raw.csv",
+    output_path: str = "bank_preprocessed.csv"
+):
+    # Load dataset mentah
+    df = pd.read_csv(input_path)
+
+    # Encoding target y (yes/no -> 1/0)
+    if "y" not in df.columns:
+        raise ValueError("Kolom target 'y' tidak ditemukan pada dataset.")
+
+    df["y"] = df["y"].map({"yes": 1, "no": 0})
+
+    if df["y"].isna().any():
+        raise ValueError("Encoding target gagal. Pastikan nilai y hanya 'yes' atau 'no'.")
+
+    # One-hot encoding fitur kategorikal
+    df_encoded = pd.get_dummies(df, drop_first=True)
+
+    # Simpan dataset hasil preprocessing
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    df_encoded.to_csv(output_path, index=False)
+
+    return df_encoded
